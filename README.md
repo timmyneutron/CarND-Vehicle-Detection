@@ -1,33 +1,105 @@
-# Vehicle Detection
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)
+
+# Udacity Self-Driving Car Nanodegree
+# Project #5: Vehicle Detection
+
+## Introduction
+This is a project for Udacity's Self-Driving Car Nanodegree. It uses computer vision techniques to detect other vehicles on the road in a video feed from a forward-facing camera.
 
 
-In this project, your goal is to write a software pipeline to detect vehicles in a video (start with the test_video.mp4 and later implement on full project_video.mp4), but the main output or product we want you to create is a detailed writeup of the project.  Check out the [writeup template](https://github.com/udacity/CarND-Vehicle-Detection/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup.  
+## Concepts and Classes
+Concepts explored in this project:
 
-Creating a great writeup:
----
-A great writeup should include the rubric points as well as your description of how you addressed each point.  You should include a detailed description of the code used in each step (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
+  - Color spaces and their relative advantages/disadvantages
+  - Spatial binning
+  - Color histograms
+  - Histograms of Oriented Gradients (HOG)
+  - Image classification using support vector machines
+  - Using moving windows to search for images
 
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
+## Getting Started
+To view the code, open `vehicleDetection.html` in a web browser.
 
-You can submit your writeup in markdown or use another method and submit a pdf instead.
+To view and run the code, open `vehicleDetection.ipynb` in a Jupyter Notebook. Running the code requires having the following libraries installed:
 
-The Project
----
+  - Python 3
+  - `IPython`
+  - `numpy`
+  - `cv2`
+  - `glob`
+  - `matplotlib`
+  - `moviepy`
+  - `sklearn`
 
-The goals / steps of this project are the following:
+The output video is saved as `output_video.mp4`
 
-* Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a classifier Linear SVM classifier
-* Optionally, you can also apply a color transform and append binned color features, as well as histograms of color, to your HOG feature vector. 
-* Note: for those first two steps don't forget to normalize your features and randomize a selection for training and testing.
-* Implement a sliding-window technique and use your trained classifier to search for vehicles in images.
-* Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
-* Estimate a bounding box for vehicles detected.
+## Histograms of Oriented Gradients (HOG) Features
 
-Here are links to the labeled data for [vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/vehicles.zip) and [non-vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/non-vehicles.zip) examples to train your classifier.  These example images come from a combination of the [GTI vehicle image database](http://www.gti.ssr.upm.es/data/Vehicle_database.html), the [KITTI vision benchmark suite](http://www.cvlibs.net/datasets/kitti/), and examples extracted from the project video itself.   You are welcome and encouraged to take advantage of the recently released [Udacity labeled dataset](https://github.com/udacity/self-driving-car/tree/master/annotations) to augment your training data.  
+I calculated HOG features for images using the `sklearn.feature.hog` method, using the following parameters:
 
-Some example images for testing your pipeline on single frames are located in the `test_images` folder.  To help the reviewer examine your work, please save examples of the output from each stage of your pipeline in the folder called `ouput_images`, and include them in your writeup for the project by describing what each image shows.    The video called `project_video.mp4` is the video your pipeline should work well on.  
+  - 9 bins for gradient orientations, which is shown [here](http://lear.inrialpes.fr/people/triggs/pubs/Dalal-cvpr05.pdf) to be the optimal number for a similar classification problem.
+  - 8x8 pixel per cell, which is an appropriate number given the size of the features we're looking for in the image (~8x8 pixels)
+  - 2x2 cells per block, which gives a good local normalization for gradients in each block
 
-**As an optional challenge** Once you have a working pipeline for vehicle detection, add in your lane-finding algorithm from the last project to do simultaneous lane-finding and vehicle detection!
+Also, HOG features capture gradients, so I converted the original RGB images to YCrCb - YCrCb puts most of the visibility information (luminance) in the Y channel, and the color information in the Cr (chroma red) and Cb (chroma blue) channels, while maintaining the original shape of the image in all three channels. This helps to emphasize the gradients in the image.
 
-**If you're feeling ambitious** (also totally optional though), don't stop there!  We encourage you to go out and take video of your own, and show us how you would implement this project on a new video!
+Examples of car and not-car images show below with their respective HOG images, in which gradient features are clearly visible.
+
+![png](output_images/output_4_1.png)
+
+
+## Spatial Binning
+
+I converted the 64x64 training images to 16x16 images, and unraveled those to extract spatial binning features. Converting to 16x16 reduces the feature vector size, while still maintaining the relevant features of the images (show below).
+
+![png](output_images/output_6_1.png)
+
+
+## Color Histograms
+
+I took the color histograms for each channel in each image, using 32 bins for the histograms. This captures information related to the prevalence of certain colors in an image, without regard to position within the image.
+
+Color histograms (in YCrCb) for car and not-car images show below.
+
+![png](output_images/output_8_1.png)
+
+## Training the classifier
+
+I extracted spatial, color histogram, and HOG features. This gives a feature vector of length 6156 features, so I chose to train a LinearSVC classifier on the data. This was because a) support vector machines are robust to data with large numbers of features, and b) once trained, prediction is relatively fast, and the classifier needs to be able to work in real time.
+
+I chose to convert images to YCrCb color space, because (as previously mentioned) it helps in capturing gradients while maintaining the shape of the image in all 3 channels. I confirmed this by training the classifier with different color spaces, and the YCrCb gave the highest classification accuracy, which was over 99%.
+
+I also tested different values of the C parameter for the LinearSVC - the C parameter is a penalty for misclassification, and generally corresponds the bias/variance tradeoff for classification, where a lower C value gives a higher bias model, and a higher C value gives a higher variance model. From this, I found a C value of 10 gave the highest classification accuracy.
+
+## Finding cars in a video frame
+
+Once the classifier was trained, the next step was to find cars in test video frames. The simplest way to do this is to define moving windows of different sizes to scan the region where cars are expected to be found (the bottom half of the image), extract features in the same way that images were extracted, and use the classifier to predict whether or not that window contains a car.
+
+One drawback to this approach is that finding HOG features is computationally expensive, so instead, HOG features are calculated once for the whole image, and then those features are stepped through to find HOG features. Different window sizes are simulated by resizing the whole image before finding HOG features.
+
+Spatial binning and color histogram features are found by correlating the location of the window in the HOG image with the location of the window in the original pixel image.
+
+I used windows of size 64x64 pixels and 96x96 pixels, since these two combined consistently found the cars while generally avoiding false positives.
+
+## Heat Mapping and Labeling
+
+I used heat mapping and thresholding to identify true positives and eliminate false positives. Each positive window adds +1 "heat" to all its pixels in a heat map image, and once all windows are cycled through, any pixels with a heat below a certain threshold are eliminated. This is effective in removing false positives, as well as separating individual cars into contiguous regions of high heat.
+
+Once thresholding was applied, I used `scipy.ndimage.measurements.label` to label all the contiguous regions on the heat map (which correspond to individual cars), and drew bounding boxes around each region. I also added the label number on top of each car to show the continuity of cars between frames, and to show how many regions are identified in the frame.
+
+Box images, heat maps, and labeled bounding box images show below.
+
+![png](output_images/output_18_0.png)
+
+
+## Testing on Video
+
+Since it takes a while to process the output video, I found it efficient to break the project video into 10 second clips for testing. This helped when I only wanted to test changes to the pipeline on certain pieces of the video.
+
+Also in the actual video stream, I smoothed out the predictions by using a moving average of 20 frames for heat mapping before thresholding.
+
+## Discussion/Areas for Improvement
+
+The classifier tracks all cars fairly reliably on the project video. The biggest issue is that it doesn't detect cars just as they are entering the field of vision from the side, and only detects them once they moved quite a bit onto the frame. This is most likely because of the training data used for the classifier - almost all the training images for cars were taken from behind the car, rather than to the side. More training data that fits this case would likely solve this problem.
+
+Another less important issue is that the classifier loses track of individual cars when they overlap, since overlapping heat map regions don't differentiate between cars. This could be solved perhaps with training classifiers for different color cars (perhaps one for black, and one for white), and using more robust logic to keep track of cars when they are occluded.
