@@ -22,16 +22,11 @@ To view the project video, click [here](https://youtu.be/uu2P16EPm1Y).
 
 To view the code, open `vehicleDetection.html` in a web browser.
 
-To view and run the code, open `vehicleDetection.ipynb` in a Jupyter Notebook. You'll need to download [vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/vehicles.zip) and [non-vehicle training](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/non-vehicles.zip) training images and save them to a folder titled `training_images`. You also need the following libraries installed:
+To run the code, first follow the instructions [here](https://github.com/udacity/CarND-Term1-Starter-Kit) to download and install the necessary dependencies. Then open `vehicleDetection.ipynb` by executing:
 
-  - Python 3
-  - `IPython`
-  - `numpy`
-  - `cv2`
-  - `glob`
-  - `matplotlib`
-  - `moviepy`
-  - `sklearn`
+```sh
+$ jupyter notebook vehicleDetection.ipynb
+```
 
 The output video is saved as `output_video.mp4`
 
