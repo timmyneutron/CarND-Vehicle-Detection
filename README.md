@@ -28,9 +28,9 @@ To run the code, first follow the instructions [here](https://github.com/udacity
 $ jupyter notebook vehicleDetection.ipynb
 ```
 
-The output video is saved as `output_video.mp4`
+## Write Up
 
-## Histograms of Oriented Gradients (HOG) Features
+### Histograms of Oriented Gradients (HOG) Features
 
 I calculated HOG features for images using the `sklearn.feature.hog` method, using the following parameters:
 
@@ -45,14 +45,14 @@ Examples of car and not-car images show below with their respective HOG images, 
 ![png](output_images/output_4_1.png)
 
 
-## Spatial Binning
+### Spatial Binning
 
 I converted the 64x64 training images to 16x16 images, and unraveled those to extract spatial binning features. Converting to 16x16 reduces the feature vector size, while still maintaining the relevant features of the images (show below).
 
 ![png](output_images/output_6_1.png)
 
 
-## Color Histograms
+### Color Histograms
 
 I took the color histograms for each channel in each image, using 32 bins for the histograms. This captures information related to the prevalence of certain colors in an image, without regard to position within the image.
 
@@ -60,7 +60,7 @@ Color histograms (in YCrCb) for car and not-car images show below.
 
 ![png](output_images/output_8_1.png)
 
-## Training the classifier
+### Training the classifier
 
 I extracted spatial, color histogram, and HOG features. This gives a feature vector of length 6156 features, so I chose to train a LinearSVC classifier on the data. This was because a) support vector machines are robust to data with large numbers of features, and b) once trained, prediction is relatively fast, and the classifier needs to be able to work in real time.
 
@@ -68,7 +68,7 @@ I chose to convert images to YCrCb color space, because (as previously mentioned
 
 I also tested different values of the C parameter for the LinearSVC - the C parameter is a penalty for misclassification, and generally corresponds the bias/variance tradeoff for classification, where a lower C value gives a higher bias model, and a higher C value gives a higher variance model. From this, I found a C value of 10 gave the highest classification accuracy.
 
-## Finding cars in a video frame
+### Finding cars in a video frame
 
 Once the classifier was trained, the next step was to find cars in test video frames. The simplest way to do this is to define moving windows of different sizes to scan the region where cars are expected to be found (the bottom half of the image), extract features in the same way that images were extracted, and use the classifier to predict whether or not that window contains a car.
 
@@ -78,7 +78,7 @@ Spatial binning and color histogram features are found by correlating the locati
 
 I used windows of size 64x64 pixels and 96x96 pixels, since these two combined consistently found the cars while generally avoiding false positives.
 
-## Heat Mapping and Labeling
+### Heat Mapping and Labeling
 
 I used heat mapping and thresholding to identify true positives and eliminate false positives. Each positive window adds +1 "heat" to all its pixels in a heat map image, and once all windows are cycled through, any pixels with a heat below a certain threshold are eliminated. This is effective in removing false positives, as well as separating individual cars into contiguous regions of high heat.
 
@@ -89,13 +89,13 @@ Box images, heat maps, and labeled bounding box images show below.
 ![png](output_images/output_18_0.png)
 
 
-## Testing on Video
+### Testing on Video
 
 Since it takes a while to process the output video, I found it efficient to break the project video into 10 second clips for testing. This helped when I only wanted to test changes to the pipeline on certain pieces of the video.
 
 Also in the actual video stream, I smoothed out the predictions by using a moving average of 20 frames for heat mapping before thresholding.
 
-## Discussion/Areas for Improvement
+### Discussion/Areas for Improvement
 
 The classifier tracks all cars fairly reliably on the project video. The biggest issue is that it doesn't detect cars just as they are entering the field of vision from the side, and only detects them once they moved quite a bit onto the frame. This is most likely because of the training data used for the classifier - almost all the training images for cars were taken from behind the car, rather than to the side. More training data that fits this case would likely solve this problem.
 
