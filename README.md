@@ -18,6 +18,8 @@ Concepts explored in this project:
   - Using moving windows to search for images
 
 ## Getting Started
+To view the project video, click [here](https://youtu.be/uu2P16EPm1Y).
+
 To view the code, open `vehicleDetection.html` in a web browser.
 
 To view and run the code, open `vehicleDetection.ipynb` in a Jupyter Notebook. You'll need to download [vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/vehicles.zip) and [non-vehicle training](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/non-vehicles.zip) training images and save them to a folder titled `training_images`. You also need the following libraries installed:
