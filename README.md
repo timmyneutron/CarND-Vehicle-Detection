@@ -3,9 +3,10 @@
 # Udacity Self-Driving Car Nanodegree
 # Project #5: Vehicle Detection
 
+![](https://raw.githubusercontent.com/timmyneutron/CarND-Vehicle-Detection/master/output_images/boundingboxes.jpg)
+
 ## Introduction
 This is a project for Udacity's Self-Driving Car Nanodegree. It uses computer vision techniques to detect other vehicles on the road in a video feed from a forward-facing camera.
-
 
 ## Concepts and Classes
 Concepts explored in this project:
