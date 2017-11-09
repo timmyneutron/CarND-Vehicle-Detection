@@ -21,13 +21,7 @@ Concepts explored in this project:
 ## Getting Started
 To view the project video, click [here](https://youtu.be/uu2P16EPm1Y).
 
-To view the code, open `vehicleDetection.html` in a web browser.
-
-To run the code, first follow the instructions [here](https://github.com/udacity/CarND-Term1-Starter-Kit) to download and install the necessary dependencies. Then open `vehicleDetection.ipynb` by executing:
-
-```sh
-$ jupyter notebook vehicleDetection.ipynb
-```
+To view the source code, open `vehicleDetection.html` in a web browser.
 
 ## Write Up
 
